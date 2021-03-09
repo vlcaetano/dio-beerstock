@@ -3,6 +3,7 @@ package com.dio.beerstock.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.Mockito.when;
 
@@ -51,9 +52,19 @@ public class BeerServiceTest {
 		assertThat(createdBeerDTO.getName(), is(equalTo(expectedBeerDTO.getName())));
 		assertThat(createdBeerDTO.getQuantity(), is(equalTo(expectedBeerDTO.getQuantity())));
 		
-		assertThat(createdBeerDTO.getQuantity(), is(greaterThan(2)));
+		//assertThat(createdBeerDTO.getQuantity(), is(greaterThan(2)));
+	}
+	
+	@Test
+	void whenAlreadyRegisteredBeerIsInformedAnExceptionShouldBeThrown() {
+		//given
+		BeerDTO expectedBeerDTO = BeerDTOBuilder.builder().build().toBeerDTO();
+		Beer duplicatedBeer = beerMapper.toModel(expectedBeerDTO);
 		
-		/*assertEquals(expectedBeerDTO.getId(), createdBeerDTO.getId());
-		assertEquals(expectedBeerDTO.getName(), createdBeerDTO.getName());*/
+		//when
+		when(beerRepository.findByName(expectedBeerDTO.getName())).thenReturn(Optional.of(duplicatedBeer));
+		
+		//then
+		assertThrows(BeerAlreadyRegisteredException.class, () -> beerService.createBeer(expectedBeerDTO));
 	}
 }
